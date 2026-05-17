@@ -1,5 +1,7 @@
 # Stepping Feet Illusion
 
+👉 [**Play with the Live Demo!**](https://cantonsir.github.io/stepping-feet-illusion/)
+
 This project is an interactive, web-based demonstration of the famous optical illusion known as the "Stepping Feet Illusion". It explores how our perception of motion and speed is directly influenced by color contrast.
 
 ## The Illusion
@@ -18,11 +20,16 @@ This demo includes an interactive glassmorphism control panel that lets you test
 - **Bars/Foot**: Adjust the ratio of background stripes. Specifically, you can manipulate exactly how many narrow background stripes can fit inside a single moving block.
 - **Speed**: Adjust how fast the blocks move across the screen.
 
-## How To Run Locally (Mac)
+## How To Run Locally
 
-This is built entirely with simple, "vanilla" web technologies (HTML, CSS, and JavaScript). You do not need any servers, dependencies, or installations to run it.
+This is built entirely with simple, "vanilla" web technologies (HTML, CSS, and JavaScript). You do not need any servers, dependencies, or build tools to run it.
 
-1. Open your Mac's **Finder**.
-2. Navigate to the folder containing this project: `OneDrive-Personal -> Code -> Demo night -> stepping-feet-illusion`.
-3. Find the file named `index.html`.
-4. **Double-click** `index.html`. It will instantly open up and run in your default web browser (like Safari or Chrome)!
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/cantonsir/stepping-feet-illusion.git
+   ```
+2. Navigate into the folder.
+3. Simply open `index.html` in your favorite web browser!
+
+## Open Source
+This project is open-source and free to use. Contributions, forks, and improvements are always welcome!
