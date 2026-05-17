@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stepping Feet Illusion</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>Stepping Feet Illusion</h1>
+            <p>Observe the two moving rectangles. They appear to take alternating "steps".
+               However, they are actually moving at a constant, identical speed. 
+               Use the controls to reveal the illusion.</p>
+        </header>
+
+        <main class="main-content">
+            <div class="illusion-container glassmorphism">
+                <div id="canvas" class="canvas playing">
+                    <div id="foot-dark" class="foot dark-foot"></div>
+                    <div id="foot-light" class="foot light-foot"></div>
+                    <div id="reference-dot" class="reference-dot" aria-hidden="true"></div>
+                </div>
+            </div>
+
+            <div class="controls glassmorphism" aria-label="Illusion controls">
+                <div class="control-row primary-controls">
+                    <div class="control-group action-group">
+                        <button id="btn-play" class="control-button primary" type="button" aria-pressed="true">
+                            <i data-lucide="pause" aria-hidden="true"></i>
+                            <span>Pause</span>
+                        </button>
+                        <button id="btn-dot" class="control-button" type="button" aria-pressed="false">
+                            <i data-lucide="circle" aria-hidden="true"></i>
+                            <span>Dot</span>
+                        </button>
+                        <button id="btn-fullscreen" class="control-button" type="button" aria-pressed="false">
+                            <i data-lucide="maximize" aria-hidden="true"></i>
+                            <span>Full</span>
+                        </button>
+                        <button id="btn-reset" class="control-button" type="button">
+                            <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+                            <span>Reset</span>
+                        </button>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="switch-control">
+                            <input type="checkbox" id="cb-contrast" checked>
+                            <span class="switch-track" aria-hidden="true"></span>
+                            <span>High contrast</span>
+                        </label>
+                    </div>
+
+                    <label class="control-group select-group">
+                        <span>Color</span>
+                        <select id="color-scheme" class="dropdown">
+                            <option value="blue-yellow">Blue/yellow</option>
+                            <option value="black-white">Black/white</option>
+                            <option value="red-green">Red/green</option>
+                            <option value="grey">Grey</option>
+                        </select>
+                    </label>
+
+                    <label class="control-group number-group">
+                        <span>Bars/foot</span>
+                        <input type="number" id="input-bars" min="1" max="30" value="8">
+                    </label>
+
+                    <label class="control-group number-group">
+                        <span>Speed</span>
+                        <input type="number" id="input-speed" min="1" max="10" value="2" step="0.5">
+                    </label>
+                </div>
+
+                <div class="control-row shape-controls">
+                    <label class="control-group range-group">
+                        <span>Dot Y</span>
+                        <input type="range" id="input-dot-y" min="20" max="80" value="50" step="1">
+                        <output id="dot-y-value" for="input-dot-y">50</output>
+                    </label>
+
+                    <label class="control-group range-group">
+                        <span>Length</span>
+                        <input type="range" id="input-length" min="50" max="180" value="100" step="5">
+                        <output id="length-value" for="input-length">100</output>
+                    </label>
+
+                    <label class="control-group range-group">
+                        <span>Width</span>
+                        <input type="range" id="input-width" min="20" max="90" value="50" step="2">
+                        <output id="width-value" for="input-width">50</output>
+                    </label>
+
+                    <label class="control-group range-group">
+                        <span>Rotate</span>
+                        <input type="range" id="input-rotate" min="-90" max="90" value="0" step="1">
+                        <output id="rotate-value" for="input-rotate">0</output>
+                    </label>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="main.js"></script>
+    <script>
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
