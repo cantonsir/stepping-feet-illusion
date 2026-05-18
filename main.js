@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const SCRIPT_URL = "PASTE_STEPPING_FEET_SCRIPT_URL_HERE";
+
     const root = document.documentElement;
     const canvas = document.getElementById('canvas');
     const appContainer = document.querySelector('.app-container');
@@ -18,6 +20,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const widthValue = document.getElementById('width-value');
     const inputRotate = document.getElementById('input-rotate');
     const rotateValue = document.getElementById('rotate-value');
+    const taskUi = document.getElementById('task-ui');
+    const taskScreens = {
+        menu: document.getElementById('task-menu'),
+        instruction: document.getElementById('task-instruction'),
+        response: document.getElementById('task-response'),
+    };
+    const taskConditionLabel = document.getElementById('task-condition-label');
+    const taskTitle = document.getElementById('task-title');
+    const taskDesc = document.getElementById('task-desc');
+    const taskRunningLabel = document.getElementById('task-running-label');
+    const responseConditionLabel = document.getElementById('response-condition-label');
+    const responseNote = document.getElementById('response-note');
+    const submitResponse = document.getElementById('submit-response');
+    const submitStatus = document.getElementById('submit-status');
+
     const defaults = {
         bars: 8,
         speed: 2,
@@ -28,6 +45,60 @@ document.addEventListener('DOMContentLoaded', () => {
         contrast: true,
         colorScheme: 'blue-yellow',
     };
+
+    const conditions = {
+        dot: {
+            key: 'dot',
+            label: 'Red-dot fixation',
+            title: 'Keep your eyes on the red dot',
+            desc: 'Watch for about one minute. Keep your eyes on the red dot and notice what the moving blocks seem to do.',
+            runningLabel: 'Keep your eyes on the red dot',
+            dotVisible: true,
+        },
+        free: {
+            key: 'free',
+            label: 'Free viewing',
+            title: 'Watch naturally',
+            desc: 'Watch for about one minute. Look naturally at the display and notice what stands out most.',
+            runningLabel: 'Watch naturally',
+            dotVisible: false,
+        },
+        observed: {
+            key: 'observed',
+            label: 'Observed gaze',
+            title: 'Watch naturally',
+            desc: 'Watch for about one minute. The host can note gaze separately; answer only what you noticed.',
+            runningLabel: 'Watch naturally while gaze is observed',
+            dotVisible: false,
+        },
+    };
+
+    const conditionAliases = {
+        fixation: 'dot',
+        red: 'dot',
+        red_dot: 'dot',
+        'red-dot': 'dot',
+        freeview: 'free',
+        free_viewing: 'free',
+        'free-viewing': 'free',
+        gaze: 'observed',
+        tracker: 'observed',
+        tracked: 'observed',
+        observe: 'observed',
+    };
+
+    const sessionId = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : `${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+    const responseState = {
+        perception: '',
+        attention: '',
+        strength: '',
+    };
+    let currentCondition = null;
+    let submitting = false;
+    let wakeLock = null;
+    let startedFromPreset = false;
 
     const refreshIcons = () => {
         if (window.lucide) {
@@ -63,6 +134,16 @@ document.addEventListener('DOMContentLoaded', () => {
             <span>${isFullscreen ? 'Exit' : 'Full'}</span>
         `;
         refreshIcons();
+    };
+
+    const setPlaying = (isPlaying) => {
+        canvas.classList.toggle('playing', isPlaying);
+        setPlayButton();
+    };
+
+    const setDotVisible = (isVisible) => {
+        canvas.classList.toggle('show-dot', isVisible);
+        setDotButton();
     };
 
     btnPlay.addEventListener('click', () => {
@@ -189,6 +270,255 @@ document.addEventListener('DOMContentLoaded', () => {
         setDotButton();
     };
 
+    const normalizeCondition = (value) => {
+        if (!value) return '';
+        const key = value.trim().toLowerCase();
+        return conditions[key] ? key : conditionAliases[key] || '';
+    };
+
+    const showTaskScreen = (name) => {
+        Object.entries(taskScreens).forEach(([key, screen]) => {
+            screen.classList.toggle('active', key === name);
+        });
+        document.body.classList.toggle('task-screen-visible', Boolean(name));
+        if (name) {
+            document.body.classList.remove('task-running');
+        }
+    };
+
+    const acquireWakeLock = async () => {
+        try {
+            if ('wakeLock' in navigator && !wakeLock) {
+                wakeLock = await navigator.wakeLock.request('screen');
+            }
+        } catch (error) {
+            wakeLock = null;
+        }
+    };
+
+    const releaseWakeLock = () => {
+        if (wakeLock) {
+            wakeLock.release();
+            wakeLock = null;
+        }
+    };
+
+    const enterTaskMode = (conditionKey) => {
+        document.body.classList.add('task-mode');
+        if (conditionKey) {
+            startCondition(conditionKey);
+        } else {
+            showTaskMenu();
+        }
+    };
+
+    const exitTaskMode = () => {
+        releaseWakeLock();
+        document.body.classList.remove('task-mode', 'task-screen-visible', 'task-running');
+        currentCondition = null;
+        showTaskScreen(null);
+    };
+
+    const showTaskMenu = () => {
+        currentCondition = null;
+        clearResponse();
+        showTaskScreen('menu');
+    };
+
+    const startCondition = (conditionKey) => {
+        const condition = conditions[conditionKey];
+        if (!condition) {
+            showTaskMenu();
+            return;
+        }
+
+        currentCondition = condition;
+        clearResponse();
+        setDotVisible(condition.dotVisible);
+        taskConditionLabel.textContent = condition.label;
+        taskTitle.textContent = condition.title;
+        taskDesc.textContent = condition.desc;
+        taskRunningLabel.textContent = condition.runningLabel;
+        responseConditionLabel.textContent = condition.label;
+        showTaskScreen('instruction');
+    };
+
+    const startTask = (isReview = false) => {
+        if (!currentCondition) {
+            showTaskMenu();
+            return;
+        }
+
+        setPlaying(true);
+        setDotVisible(currentCondition.dotVisible);
+        showTaskScreen(null);
+        document.body.classList.add('task-running');
+        if (!isReview) {
+            clearResponse();
+        }
+        acquireWakeLock();
+    };
+
+    const finishTask = () => {
+        releaseWakeLock();
+        document.body.classList.remove('task-running');
+        showTaskScreen('response');
+    };
+
+    const selectResponse = (field, value, button) => {
+        if (!field || !(field in responseState) || submitting) return;
+        responseState[field] = value;
+        button.closest('.response-group').querySelectorAll('.choice').forEach((choice) => {
+            choice.classList.toggle('selected', choice === button);
+        });
+        updateSubmitState();
+    };
+
+    function clearResponse() {
+        responseState.perception = '';
+        responseState.attention = '';
+        responseState.strength = '';
+        submitting = false;
+        taskUi.querySelectorAll('.choice').forEach((choice) => {
+            choice.classList.remove('selected');
+            choice.disabled = false;
+        });
+        responseNote.value = '';
+        responseNote.disabled = false;
+        submitStatus.textContent = '';
+        updateSubmitState();
+    }
+
+    function updateSubmitState() {
+        const isComplete = responseState.perception && responseState.attention && responseState.strength;
+        submitResponse.disabled = submitting || !isComplete;
+    }
+
+    const setResponseDisabled = (isDisabled) => {
+        taskUi.querySelectorAll('.choice').forEach((choice) => {
+            choice.disabled = isDisabled;
+        });
+        responseNote.disabled = isDisabled;
+        updateSubmitState();
+    };
+
+    const readNumber = (input) => {
+        const value = parseFloat(input.value);
+        return Number.isFinite(value) ? value : '';
+    };
+
+    const getCurrentSettings = () => ({
+        dotVisible: canvas.classList.contains('show-dot'),
+        bars: readNumber(inputBars),
+        speed: readNumber(inputSpeed),
+        footLength: readNumber(inputLength),
+        footWidth: readNumber(inputWidth),
+        rotate: readNumber(inputRotate),
+        dotY: readNumber(inputDotY),
+        highContrast: cbContrast.checked,
+        colorScheme: colorScheme.value,
+    });
+
+    const submitTaskResponse = () => {
+        if (!currentCondition || submitResponse.disabled || submitting) return;
+
+        submitting = true;
+        setResponseDisabled(true);
+        submitResponse.disabled = true;
+        submitStatus.textContent = 'Saving...';
+
+        const payload = {
+            session: sessionId,
+            timestamp: new Date().toISOString(),
+            condition: currentCondition.key,
+            perception: responseState.perception,
+            attention: responseState.attention,
+            strength: responseState.strength,
+            note: responseNote.value.trim(),
+            ...getCurrentSettings(),
+        };
+
+        window.__steppingFeetLastPayload = payload;
+
+        const hasScriptUrl = SCRIPT_URL && !SCRIPT_URL.includes('PASTE_');
+        if (hasScriptUrl) {
+            try {
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    keepalive: true,
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload),
+                }).catch((error) => console.error('submit failed', error));
+            } catch (error) {
+                console.error('submit threw', error);
+            }
+        } else {
+            console.warn('No SCRIPT_URL set - response not sent:', payload);
+        }
+
+        setTimeout(() => {
+            submitStatus.textContent = hasScriptUrl
+                ? 'Submitted. Thank you.'
+                : 'Recorded locally. Add SCRIPT_URL to send.';
+
+            setTimeout(() => {
+                submitting = false;
+                if (startedFromPreset && currentCondition) {
+                    startCondition(currentCondition.key);
+                } else {
+                    showTaskMenu();
+                }
+            }, 650);
+        }, 250);
+    };
+
+    taskUi.addEventListener('click', (event) => {
+        const conditionButton = event.target.closest('[data-condition]');
+        if (conditionButton) {
+            startedFromPreset = false;
+            startCondition(conditionButton.dataset.condition);
+            return;
+        }
+
+        const action = event.target.closest('[data-task-action]')?.dataset.taskAction;
+        if (action === 'start-task') {
+            startTask(false);
+            return;
+        }
+        if (action === 'finish-task') {
+            finishTask();
+            return;
+        }
+        if (action === 'watch-again') {
+            startTask(true);
+            return;
+        }
+        if (action === 'show-menu') {
+            startedFromPreset = false;
+            showTaskMenu();
+            return;
+        }
+        if (action === 'exit-task-mode') {
+            exitTaskMode();
+            return;
+        }
+
+        const choice = event.target.closest('.choice');
+        if (choice) {
+            const group = choice.closest('.response-group');
+            selectResponse(group?.dataset.field, choice.dataset.value, choice);
+        }
+    });
+
+    submitResponse.addEventListener('click', submitTaskResponse);
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && document.body.classList.contains('task-running')) {
+            acquireWakeLock();
+        }
+    });
+
     colorScheme.addEventListener('change', updateColorScheme);
     inputBars.addEventListener('input', updateStripeWidth);
     inputBars.addEventListener('change', updateStripeWidth);
@@ -213,4 +543,14 @@ document.addEventListener('DOMContentLoaded', () => {
     setPlayButton();
     setDotButton();
     setFullscreenButton();
+
+    const params = new URLSearchParams(location.search);
+    const presetCondition = normalizeCondition(params.get('condition'));
+    const phoneViewport = window.matchMedia('(max-width: 720px)').matches;
+    const taskRequested = presetCondition || params.has('demo') || phoneViewport;
+
+    if (taskRequested) {
+        startedFromPreset = Boolean(presetCondition);
+        enterTaskMode(presetCondition);
+    }
 });

@@ -2,9 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#111114">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Stepping Feet Illusion</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=phone-demo">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -106,8 +109,101 @@
             </div>
         </main>
     </div>
+
+    <div id="task-ui" class="task-ui" aria-live="polite">
+        <section id="task-menu" class="task-screen active" aria-labelledby="task-menu-title">
+            <div class="task-screen-center">
+                <h1 id="task-menu-title">Stepping Feet Demo</h1>
+                <p class="task-intro">Choose the viewing condition, then hand the phone to the participant.</p>
+                <div class="condition-list" aria-label="Viewing condition">
+                    <button class="condition-card" type="button" data-condition="dot">
+                        <span class="condition-title">Red-dot fixation</span>
+                        <span class="condition-desc">Keep eyes on the red dot and report what the moving feet do.</span>
+                    </button>
+                    <button class="condition-card" type="button" data-condition="free">
+                        <span class="condition-title">Free viewing</span>
+                        <span class="condition-desc">Watch naturally without a fixation point.</span>
+                    </button>
+                    <button class="condition-card" type="button" data-condition="observed">
+                        <span class="condition-title">Observed gaze</span>
+                        <span class="condition-desc">Watch naturally while the host or tracker notes gaze separately.</span>
+                    </button>
+                </div>
+                <button class="task-link" type="button" data-task-action="exit-task-mode">Open desktop controls</button>
+            </div>
+        </section>
+
+        <section id="task-instruction" class="task-screen" aria-labelledby="task-title">
+            <div class="task-screen-center">
+                <p class="task-kicker" id="task-condition-label">Viewing condition</p>
+                <h1 id="task-title">Watch the motion</h1>
+                <p id="task-desc" class="task-intro"></p>
+                <div class="task-preview">
+                    <p>After watching, answer three quick questions:</p>
+                    <ul>
+                        <li>What did you see most?</li>
+                        <li>Where was your attention?</li>
+                        <li>How strong was the effect?</li>
+                    </ul>
+                </div>
+                <button class="task-button" type="button" data-task-action="start-task">Start</button>
+                <button class="task-link" type="button" data-task-action="show-menu">Change condition</button>
+            </div>
+        </section>
+
+        <div id="task-overlay" class="task-overlay">
+            <div id="task-running-label" class="task-running-label">Watch the motion</div>
+            <button id="task-done" class="task-done" type="button" data-task-action="finish-task">Done</button>
+        </div>
+
+        <section id="task-response" class="task-screen" aria-labelledby="response-title">
+            <div class="task-screen-center">
+                <div class="response-card">
+                    <button class="task-link response-back" type="button" data-task-action="watch-again">Watch again</button>
+                    <p class="task-kicker" id="response-condition-label">Viewing condition</p>
+                    <h1 id="response-title">What did you notice?</h1>
+
+                    <fieldset class="response-group" data-field="perception">
+                        <legend>What did you see most?</legend>
+                        <button type="button" class="choice" data-value="stepping">Stepping / stop-start</button>
+                        <button type="button" class="choice" data-value="smooth">Smooth motion</button>
+                        <button type="button" class="choice" data-value="speed-change">Speeding up / slowing down</button>
+                        <button type="button" class="choice" data-value="scale-change">Shrink / expand</button>
+                        <button type="button" class="choice" data-value="none">No clear effect</button>
+                        <button type="button" class="choice" data-value="other">Other</button>
+                    </fieldset>
+
+                    <fieldset class="response-group" data-field="attention">
+                        <legend>Where was your attention?</legend>
+                        <button type="button" class="choice" data-value="red-dot">Red dot</button>
+                        <button type="button" class="choice" data-value="moving-blocks">Moving blocks</button>
+                        <button type="button" class="choice" data-value="edge">Edge / contact area</button>
+                        <button type="button" class="choice" data-value="stripes">Background stripes</button>
+                        <button type="button" class="choice" data-value="whole-display">Whole display</button>
+                        <button type="button" class="choice" data-value="shifted-unsure">Shifted / not sure</button>
+                    </fieldset>
+
+                    <fieldset class="response-group strength-group" data-field="strength">
+                        <legend>How strong was it?</legend>
+                        <button type="button" class="choice" data-value="none">None</button>
+                        <button type="button" class="choice" data-value="weak">Weak</button>
+                        <button type="button" class="choice" data-value="medium">Medium</button>
+                        <button type="button" class="choice" data-value="strong">Strong</button>
+                    </fieldset>
+
+                    <label class="note-field" for="response-note">
+                        <span>Optional note</span>
+                        <input id="response-note" type="text" placeholder="one short sentence" autocomplete="off" autocapitalize="sentences">
+                    </label>
+
+                    <button id="submit-response" class="task-button submit-response" type="button" disabled>Submit</button>
+                    <p id="submit-status" class="submit-status" role="status"></p>
+                </div>
+            </div>
+        </section>
+    </div>
     
-    <script src="main.js"></script>
+    <script src="main.js?v=phone-demo"></script>
     <script>
         if (window.lucide) {
             window.lucide.createIcons();

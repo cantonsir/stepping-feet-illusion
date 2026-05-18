@@ -36,6 +36,10 @@
     padding: 0;
 }
 
+html {
+    min-height: 100%;
+}
+
 body {
     min-height: 100vh;
     display: flex;
@@ -305,7 +309,12 @@ select {
 .dropdown:focus-visible,
 .number-group input:focus-visible,
 .range-group input:focus-visible,
-.switch-control input:focus-visible + .switch-track {
+.switch-control input:focus-visible + .switch-track,
+.task-button:focus-visible,
+.task-link:focus-visible,
+.condition-card:focus-visible,
+.choice:focus-visible,
+.note-field input:focus-visible {
     outline: 2px solid var(--warning);
     outline-offset: 2px;
 }
@@ -434,6 +443,393 @@ select {
     font-size: 0.9rem;
     font-variant-numeric: tabular-nums;
     text-align: right;
+}
+
+.task-ui {
+    display: none;
+}
+
+body.task-mode {
+    width: 100%;
+    height: 100dvh;
+    min-height: 100dvh;
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    background: var(--page-bg);
+}
+
+body.task-mode .app-container {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    gap: 0;
+}
+
+body.task-mode.task-screen-visible .app-container {
+    visibility: hidden;
+}
+
+body.task-mode .header,
+body.task-mode .controls {
+    display: none;
+}
+
+body.task-mode .main-content {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+body.task-mode .illusion-container {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+body.task-mode .canvas {
+    width: 100vw;
+    height: 100dvh;
+    min-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+body.task-mode .task-ui {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    pointer-events: none;
+}
+
+.task-screen {
+    position: fixed;
+    inset: 0;
+    display: none;
+    padding: max(env(safe-area-inset-top, 0px), 22px) 18px max(env(safe-area-inset-bottom, 0px), 22px);
+    overflow-y: auto;
+    background:
+        radial-gradient(circle at top left, rgba(34, 199, 184, 0.14), transparent 24rem),
+        var(--page-bg);
+    pointer-events: auto;
+}
+
+.task-screen.active {
+    display: flex;
+}
+
+.task-screen-center {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    text-align: left;
+}
+
+.task-screen h1 {
+    font-size: 1.65rem;
+    line-height: 1.05;
+    margin-bottom: 12px;
+}
+
+.task-intro {
+    color: var(--text-secondary);
+    font-size: 0.98rem;
+    line-height: 1.48;
+    margin-bottom: 18px;
+}
+
+.task-kicker {
+    margin-bottom: 8px;
+    color: var(--accent);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.condition-list {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.condition-card,
+.choice,
+.task-button,
+.task-link {
+    font: inherit;
+}
+
+.condition-card {
+    display: grid;
+    gap: 5px;
+    width: 100%;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.06);
+    text-align: left;
+    cursor: pointer;
+}
+
+.condition-card:active,
+.choice:active,
+.task-link:active {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.condition-title {
+    font-weight: 800;
+}
+
+.condition-desc {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.35;
+}
+
+.task-preview {
+    margin: 0 0 22px;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 0.92rem;
+    line-height: 1.42;
+}
+
+.task-preview p {
+    margin-bottom: 8px;
+}
+
+.task-preview ul {
+    padding-left: 20px;
+}
+
+.task-preview li + li {
+    margin-top: 3px;
+}
+
+.task-button {
+    min-height: 48px;
+    width: 100%;
+    border: 1px solid rgba(34, 199, 184, 0.82);
+    border-radius: 8px;
+    color: var(--accent-ink);
+    background: var(--accent);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.task-button:active {
+    background: var(--accent-hover);
+}
+
+.task-button:disabled {
+    color: var(--text-muted);
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+    cursor: default;
+}
+
+.task-link {
+    align-self: center;
+    margin-top: 14px;
+    border: 0;
+    color: var(--text-secondary);
+    background: transparent;
+    font-size: 0.92rem;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.task-overlay {
+    position: fixed;
+    top: max(env(safe-area-inset-top, 0px), 12px);
+    left: 50%;
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transform: translateX(-50%);
+    pointer-events: auto;
+}
+
+body.task-running .task-overlay {
+    display: flex;
+}
+
+.task-running-label {
+    max-width: min(92vw, 430px);
+    padding: 6px 10px;
+    border-radius: 6px;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.78);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.task-done {
+    min-width: 78px;
+    min-height: 42px;
+    border: 0;
+    border-radius: 8px;
+    color: var(--accent-ink);
+    background: var(--accent);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.response-card {
+    width: 100%;
+    padding: 0 0 8px;
+}
+
+.response-back {
+    margin: 0 0 16px;
+}
+
+.response-group {
+    min-width: 0;
+    margin: 0 0 18px;
+    padding: 0;
+    border: 0;
+}
+
+.response-group legend,
+.note-field span {
+    display: block;
+    margin-bottom: 9px;
+    color: var(--text-primary);
+    font-size: 0.98rem;
+    font-weight: 800;
+}
+
+.choice {
+    width: 100%;
+    min-height: 42px;
+    margin-bottom: 7px;
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 0.93rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.choice.selected {
+    color: var(--accent-ink);
+    border-color: rgba(34, 199, 184, 0.85);
+    background: var(--accent);
+    font-weight: 800;
+}
+
+.strength-group {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+}
+
+.strength-group legend {
+    grid-column: 1 / -1;
+}
+
+.strength-group .choice {
+    min-height: 40px;
+    margin-bottom: 0;
+    padding: 9px 6px;
+    text-align: center;
+}
+
+.note-field {
+    display: block;
+    margin-bottom: 16px;
+}
+
+.note-field input {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.note-field input::placeholder {
+    color: var(--text-muted);
+}
+
+.submit-response {
+    margin-top: 4px;
+}
+
+.submit-status {
+    min-height: 20px;
+    margin-top: 10px;
+    color: var(--text-secondary);
+    font-size: 0.86rem;
+    text-align: center;
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+    .task-screen {
+        padding: max(env(safe-area-inset-top, 0px), 14px) 16px max(env(safe-area-inset-bottom, 0px), 14px);
+    }
+
+    .task-screen-center {
+        max-width: 680px;
+        justify-content: flex-start;
+    }
+
+    .condition-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .response-card {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        align-items: start;
+    }
+
+    .response-card > .response-back,
+    .response-card > .task-kicker,
+    .response-card > h1,
+    .response-card > .note-field,
+    .response-card > .submit-response,
+    .response-card > .submit-status {
+        grid-column: 1 / -1;
+    }
+
+    .response-card .strength-group {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 1180px) {
